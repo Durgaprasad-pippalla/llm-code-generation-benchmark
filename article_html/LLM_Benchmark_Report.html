@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM Code Generation Benchmark Report</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #1f2937;
+            background: white;
+            padding: 40px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            margin-bottom: 50px;
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #111827;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.2em;
+            color: #6b7280;
+            margin-bottom: 5px;
+        }
+        
+        .date {
+            font-size: 0.9em;
+            color: #9ca3af;
+        }
+        
+        h2 {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #111827;
+            margin: 40px 0 20px 0;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #2563eb;
+        }
+        
+        h3 {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #111827;
+            margin: 30px 0 15px 0;
+        }
+        
+        p {
+            margin-bottom: 15px;
+            color: #374151;
+        }
+        
+        ul {
+            margin: 15px 0 15px 20px;
+        }
+        
+        li {
+            margin-bottom: 10px;
+            color: #374151;
+        }
+        
+        .model-box {
+            background: #f9fafb;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .model-box h3 {
+            margin-top: 0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+            background: #f9fafb;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        thead {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+        }
+        
+        th {
+            padding: 18px;
+            text-align: left;
+            font-weight: bold;
+            font-size: 1.05em;
+        }
+        
+        td {
+            padding: 16px 18px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        tbody tr:hover {
+            background: #eff6ff;
+        }
+        
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .success-high {
+            color: #059669;
+            font-weight: bold;
+        }
+        
+        .success-mid {
+            color: #d97706;
+            font-weight: bold;
+        }
+        
+        .success-low {
+            color: #dc2626;
+            font-weight: bold;
+        }
+        
+        .latency-good {
+            color: #059669;
+            font-weight: bold;
+        }
+        
+        .latency-bad {
+            color: #dc2626;
+            font-weight: bold;
+        }
+        
+        .chart-container {
+            background: #f9fafb;
+            padding: 30px;
+            border-radius: 12px;
+            margin: 30px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        canvas {
+            max-width: 100%;
+        }
+        
+        .download-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #2563eb;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+            z-index: 1000;
+        }
+        
+        .download-btn:hover {
+            background: #1d4ed8;
+        }
+        
+        .footer {
+            margin-top: 60px;
+            padding-top: 30px;
+            border-top: 1px solid #e5e7eb;
+            text-align: center;
+            color: #6b7280;
+            font-size: 0.9em;
+        }
+        
+        @media print {
+            body {
+                padding: 20px;
+            }
+            .download-btn {
+                display: none;
+            }
+            .chart-container {
+                page-break-inside: avoid;
+            }
+            h2 {
+                page-break-after: avoid;
+            }
+        }
+        
+        .bullet {
+            color: #2563eb;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <button class="download-btn" onclick="window.print()">📄 Download PDF</button>
+    
+    <div class="container">
+        <div class="header">
+            <h1>Large Language Model Code Generation Benchmark</h1>
+            <p class="subtitle">Performance Analysis Across Three Leading Models</p>
+            <p class="date">November 2025</p>
+        </div>
+
+        <section>
+            <h2>Introduction</h2>
+            <p>Code generation has become a critical capability for modern large language models, with applications ranging from developer productivity tools to automated software engineering. This report presents a comprehensive benchmark evaluation of three prominent LLMs: GPT-4, GPT-3.5, and LLM X, measuring their performance across multiple dimensions of code generation tasks.</p>
+            <p>Our analysis reveals significant performance variations across models, with implications for both deployment costs and code quality. Understanding these trade-offs is essential for organizations selecting models for production use.</p>
+        </section>
+
+        <section>
+            <h2>Benchmark Design</h2>
+            <p>The benchmark consists of 100 diverse code generation tasks spanning multiple programming languages and complexity levels. Each task was designed to test specific capabilities including:</p>
+            <ul>
+                <li><span class="bullet">•</span> Algorithm implementation (sorting, searching, graph traversal)</li>
+                <li><span class="bullet">•</span> Data structure manipulation (arrays, linked lists, trees)</li>
+                <li><span class="bullet">•</span> API integration and web service implementation</li>
+                <li><span class="bullet">•</span> Error handling and edge case management</li>
+            </ul>
+            <p>Code submissions were evaluated using automated test suites, with partial credit awarded for solutions that passed a subset of test cases.</p>
+        </section>
+
+        <section>
+            <h2>Models Evaluated</h2>
+            <div class="model-box">
+                <h3>GPT-4</h3>
+                <p>OpenAI's flagship model, representing the current state-of-the-art in language understanding and code generation capabilities.</p>
+            </div>
+            <div class="model-box">
+                <h3>GPT-3.5</h3>
+                <p>A widely-deployed predecessor model offering a balance between performance and computational efficiency.</p>
+            </div>
+            <div class="model-box">
+                <h3>LLM X</h3>
+                <p>An alternative model optimized for speed and resource efficiency, representing emerging competition in the code generation space.</p>
+            </div>
+        </section>
+
+        <section>
+            <h2>Test Setup</h2>
+            <p>All models were evaluated under identical conditions to ensure fair comparison. Each model received the same prompts with standardized formatting, and responses were collected over a two-week period to account for temporal variations in API performance.</p>
+            <p>Latency measurements include end-to-end response time from request submission to complete response receipt. Token counts represent the average number of tokens generated per task, reflecting verbosity and explanation depth.</p>
+        </section>
+
+        <section>
+            <h2>Results Overview</h2>
+            <p>The table below summarizes the key performance metrics across all three models. Success Rate measures the percentage of tasks that passed all test cases, while Partial Pass Rate includes tasks that passed at least 50% of test cases.</p>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Model</th>
+                        <th>Success Rate</th>
+                        <th>Avg. Partial Pass Rate</th>
+                        <th>Mean Latency (s)</th>
+                        <th>Avg Tokens per Task</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="font-weight: bold;">GPT-4</td>
+                        <td class="success-high">90%</td>
+                        <td class="success-high">95%</td>
+                        <td>2.1</td>
+                        <td>450</td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: bold;">GPT-3.5</td>
+                        <td class="success-mid">75%</td>
+                        <td class="success-mid">82%</td>
+                        <td class="latency-good">1.8</td>
+                        <td>420</td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: bold;">LLM X</td>
+                        <td class="success-low">60%</td>
+                        <td class="success-mid">70%</td>
+                        <td class="latency-bad">3.5</td>
+                        <td class="latency-good" style="color: #059669; font-weight: bold;">400</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section>
+            <h3>Success and Partial Pass Rates</h3>
+            <p>GPT-4 demonstrates a clear advantage in code generation accuracy, achieving a 90% success rate and 95% partial pass rate. The 15-percentage-point gap between GPT-4 and GPT-3.5 suggests meaningful improvements in reasoning and edge case handling. LLM X's 60% success rate, while respectable, indicates room for improvement in complex code generation tasks.</p>
+            <div class="chart-container">
+                <canvas id="successChart"></canvas>
+            </div>
+        </section>
+
+        <section>
+            <h3>Response Latency Comparison</h3>
+            <p>Latency results reveal interesting trade-offs. GPT-3.5 offers the fastest response time at 1.8 seconds, making it attractive for latency-sensitive applications. GPT-4's 2.1-second latency represents only a 17% increase while delivering substantially higher accuracy. LLM X's 3.5-second latency is notably higher, which may impact user experience in interactive scenarios.</p>
+            <div class="chart-container">
+                <canvas id="latencyChart"></canvas>
+            </div>
+        </section>
+
+        <section>
+            <h3>Average Tokens per Task</h3>
+            <p>Token usage directly impacts API costs and response latency. GPT-4's 450 tokens per task reflects its tendency to provide detailed explanations alongside code. GPT-3.5 uses 420 tokens, while LLM X is the most economical at 400 tokens. For high-volume applications, these differences can translate to significant cost variations.</p>
+            <div class="chart-container">
+                <canvas id="tokensChart"></canvas>
+            </div>
+        </section>
+
+        <section>
+            <h2>Discussion</h2>
+            
+            <h3>Performance vs. Cost Trade-offs</h3>
+            <p>The results highlight a classic performance-efficiency trade-off. GPT-4's superior accuracy comes at the cost of higher token usage and slightly increased latency. For applications where code correctness is paramount, such as production systems or safety-critical software, GPT-4's 90% success rate justifies these costs.</p>
+            <p>GPT-3.5 occupies an interesting middle ground, offering 75% success rates with the lowest latency. This makes it suitable for applications where speed matters and occasional errors can be tolerated or corrected through human review.</p>
+
+            <h3>LLM X Positioning</h3>
+            <p>LLM X's results suggest it may be better suited for simpler code generation tasks or as a first-pass solution that undergoes subsequent refinement. Its lower token usage could be advantageous in cost-constrained environments, but the combination of higher latency and lower accuracy limits its competitiveness against established models.</p>
+
+            <h3>Partial Pass Insights</h3>
+            <p>The gap between success rates and partial pass rates reveals how often models produce "almost correct" solutions. GPT-4's narrow 5-percentage-point gap suggests that when it fails, it tends to fail completely rather than producing near-misses. In contrast, GPT-3.5's 7-point gap and LLM X's 10-point gap indicate more frequent partial successes that might be salvageable with minor corrections.</p>
+        </section>
+
+        <section>
+            <h2>Conclusion</h2>
+            <p>This benchmark demonstrates that GPT-4 remains the strongest performer for code generation tasks, achieving the highest success and partial pass rates. However, the choice of model should be driven by specific application requirements and constraints.</p>
+            <p>Organizations should consider GPT-4 for production code generation where accuracy is critical, GPT-3.5 for applications requiring low latency with acceptable accuracy, and may find LLM X suitable for simple tasks where cost optimization is the primary concern.</p>
+            <p>As the field continues to evolve, we expect to see improvements across all metrics, with particular focus on reducing the latency-accuracy trade-off that currently characterizes the landscape. Future benchmarks should also incorporate measures of code quality beyond correctness, including readability, maintainability, and security considerations.</p>
+        </section>
+
+        <div class="footer">
+            <p>LLM Code Generation Benchmark Report • November 2025</p>
+        </div>
+    </div>
+
+    <script>
+        // Chart configurations
+        Chart.defaults.font.family = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+        Chart.defaults.font.size = 13;
+
+        // Success Rate Chart
+        const successCtx = document.getElementById('successChart').getContext('2d');
+        new Chart(successCtx, {
+            type: 'bar',
+            data: {
+                labels: ['GPT-4', 'GPT-3.5', 'LLM X'],
+                datasets: [
+                    {
+                        label: 'Success Rate (%)',
+                        data: [90, 75, 60],
+                        backgroundColor: '#2563eb',
+                        borderRadius: 8,
+                        barThickness: 60
+                    },
+                    {
+                        label: 'Partial Pass Rate (%)',
+                        data: [95, 82, 70],
+                        backgroundColor: '#10b981',
+                        borderRadius: 8,
+                        barThickness: 60
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                aspectRatio: 2,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            padding: 15,
+                            font: { size: 13, weight: 'bold' }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        padding: 12,
+                        titleFont: { size: 14, weight: 'bold' },
+                        bodyFont: { size: 13 },
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': ' + context.parsed.y + '%';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            callback: function(value) { return value + '%'; }
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+
+        // Latency Chart
+        const latencyCtx = document.getElementById('latencyChart').getContext('2d');
+        new Chart(latencyCtx, {
+            type: 'bar',
+            data: {
+                labels: ['GPT-4', 'GPT-3.5', 'LLM X'],
+                datasets: [{
+                    label: 'Mean Latency (seconds)',
+                    data: [2.1, 1.8, 3.5],
+                    backgroundColor: ['#f59e0b', '#10b981', '#ef4444'],
+                    borderRadius: 8,
+                    barThickness: 80
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                aspectRatio: 2,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            padding: 15,
+                            font: { size: 13, weight: 'bold' }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        padding: 12,
+                        titleFont: { size: 14, weight: 'bold' },
+                        bodyFont: { size: 13 },
+                        callbacks: {
+                            label: function(context) {
+                                return 'Latency: ' + context.parsed.y + 's';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 4,
+                        ticks: {
+                            callback: function(value) { return value + 's'; }
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+
+        // Tokens Chart
+        const tokensCtx = document.getElementById('tokensChart').getContext('2d');
+        new Chart(tokensCtx, {
+            type: 'bar',
+            data: {
+                labels: ['GPT-4', 'GPT-3.5', 'LLM X'],
+                datasets: [{
+                    label: 'Average Tokens per Task',
+                    data: [450, 420, 400],
+                    backgroundColor: '#8b5cf6',
+                    borderRadius: 8,
+                    barThickness: 80
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                aspectRatio: 2,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            padding: 15,
+                            font: { size: 13, weight: 'bold' }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        padding: 12,
+                        titleFont: { size: 14, weight: 'bold' },
+                        bodyFont: { size: 13 },
+                        callbacks: {
+                            label: function(context) {
+                                return 'Tokens: ' + context.parsed.y;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 500,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
